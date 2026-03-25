@@ -144,7 +144,7 @@ class VideoRecorder:
     def __init__(self, filename: str, fps: float, frame_size: tuple):
         fourcc     = cv2.VideoWriter_fourcc(*"XVID")
         self._writer = cv2.VideoWriter(filename, fourcc, fps, frame_size)
-        print(f"Recording to {filename}")
+        print(f"Recording to {filename} at {fps} FPS")
 
     def write(self, frame: np.ndarray):
         self._writer.write(frame)
@@ -160,17 +160,6 @@ class VideoRecorder:
 def run_webcam(camera_index: int = 0,
                width: int = 640,
                height: int = 480) -> None:
-    """
-    Main live webcam loop with effects, FPS counter, screenshot, recording.
-
-    Keyboard shortcuts:
-      q         — quit
-      e         — cycle through effects
-      s         — save screenshot
-      r         — toggle video recording
-      f         — toggle horizontal flip
-      SPACE     — pause/resume
-    """
     # ── Effects registry ──────────────────────
     EFFECTS: list[tuple[str, Callable]] = [
         ("Normal",    effect_none),
@@ -197,7 +186,11 @@ def run_webcam(camera_index: int = 0,
 
     actual_w = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     actual_h = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-    print(f"Camera opened: {actual_w}x{actual_h}")
+    cam_fps  = cap.get(cv2.CAP_PROP_FPS)
+    if cam_fps == 0.0 or np.isnan(cam_fps):
+        cam_fps = 30.0  # Safe fallback
+
+    print(f"Camera opened: {actual_w}x{actual_h} @ {cam_fps}fps")
     print("Controls: q=quit | e=effect | s=screenshot | r=record | f=flip | SPACE=pause")
 
     # ── State ────────────────────────────────
@@ -232,7 +225,7 @@ def run_webcam(camera_index: int = 0,
         # FPS
         fps = fps_counter.tick() if not paused else 0.0
 
-        # Record (before HUD so HUD isn't in the recording)
+        # Record
         if recording and recorder:
             recorder.write(processed)
 
@@ -268,7 +261,7 @@ def run_webcam(camera_index: int = 0,
         elif key == ord('r'):
             if not recording:
                 fname    = f"recording_{int(time.time())}.avi"
-                recorder = VideoRecorder(fname, 20.0, (actual_w, actual_h))
+                recorder = VideoRecorder(fname, cam_fps, (actual_w, actual_h))
                 recording = True
             else:
                 recorder.release()
@@ -286,14 +279,9 @@ def run_webcam(camera_index: int = 0,
     cv2.destroyAllWindows()
     print("Done.")
 
-
-# ─────────────────────────────────────────────
-# Main
-# ─────────────────────────────────────────────
 def main():
     print("=== Phase 4: Live Webcam & Frame Processing ===\n")
     run_webcam(camera_index=0, width=640, height=480)
-
 
 if __name__ == "__main__":
     main()
