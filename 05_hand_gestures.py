@@ -2,7 +2,7 @@
 05_hand_gestures.py — Hand Gesture Detection (Tasks API)
 ========================================================
 Updated to use the modern MediaPipe Tasks API.
-Downloads the required model file automatically.
+Includes HD camera resolution and Full Screen display.
 """
 
 import cv2
@@ -128,8 +128,15 @@ def main():
     if not cap.isOpened():
         print("ERROR: Cannot open camera")
         return
-    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
-    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+        
+    # Set to HD resolution
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
+
+    # Setup Full Screen Window
+    window_name = "05 - Hand Gestures"
+    cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
+    cv2.setWindowProperty(window_name, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
 
     show_labels, show_skeleton = False, True
     prev_time = time.time()
@@ -200,7 +207,7 @@ def main():
             cv2.addWeighted(overlay, 0.4, frame, 0.6, 0, frame)
             cv2.putText(frame, "L=labels  S=skeleton  Q=quit", (10, 26), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (200, 200, 200), 1)
 
-            cv2.imshow("05 - Hand Gestures", frame)
+            cv2.imshow(window_name, frame)
 
             key = cv2.waitKey(1) & 0xFF
             if key == ord('q'): break

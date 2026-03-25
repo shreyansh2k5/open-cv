@@ -240,8 +240,8 @@ def run_gesture_detection(camera_index: int = 0,
         print("Cannot open camera")
         return
 
-    cap.set(cv2.CAP_PROP_FRAME_WIDTH,  640)
-    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
 
     show_landmarks = True
     screenshot_n   = 0

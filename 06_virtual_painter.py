@@ -2,6 +2,7 @@
 06_virtual_painter.py — Draw on Screen with Your Hand (Tasks API)
 =================================================================
 Updated to use the modern MediaPipe Tasks API.
+Includes HD camera resolution and Full Screen display.
 """
 
 import cv2
@@ -71,8 +72,16 @@ def main():
 
     cap = cv2.VideoCapture(0)
     if not cap.isOpened(): return
-    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640); cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+    
+    # Set to HD resolution
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
     w, h = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)), int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+
+    # Setup Full Screen Window
+    window_name = "06 - Virtual Painter"
+    cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
+    cv2.setWindowProperty(window_name, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
 
     canvas = np.zeros((h, w, 3), dtype=np.uint8)
     prev_pt, active_color_idx, pen_down = None, 0, False
@@ -83,7 +92,7 @@ def main():
     options = vision.HandLandmarkerOptions(
         base_options=base_options,
         running_mode=vision.RunningMode.VIDEO,
-        num_hands=1,                                 # <-- FIXED HERE
+        num_hands=1,
         min_hand_detection_confidence=0.75,
         min_hand_presence_confidence=0.5,
         min_tracking_confidence=0.6
@@ -158,7 +167,7 @@ def main():
             prev_time = curr_time
             cv2.putText(frame, f"FPS {fps:.0f}", (w - 75, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (130, 130, 130), 1)
 
-            cv2.imshow("06 - Virtual Painter", frame)
+            cv2.imshow(window_name, frame)
             key = cv2.waitKey(1) & 0xFF
             if key == ord('q'): break
             elif key == ord('c'): canvas[:] = 0
